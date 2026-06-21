@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>mDNS Rebroadcast</title>
+    <link rel="stylesheet" href="style.css" />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📡</text></svg>"
+    />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-icon">📡</span>
+        <div>
+          <h1>mDNS Rebroadcast</h1>
+          <p class="sub">Discover, cache &amp; re-announce services on this segment</p>
+        </div>
+      </div>
+      <div class="actions">
+        <button id="discover-btn" class="btn primary">
+          <span class="label">Discover services</span>
+          <span class="spinner" hidden></span>
+        </button>
+      </div>
+    </header>
+
+    <section class="panel" id="settings-panel">
+      <div class="setting">
+        <label class="switch">
+          <input type="checkbox" id="rebroadcast-enabled" />
+          <span class="track"></span>
+        </label>
+        <div>
+          <strong>Rebroadcasting</strong>
+          <span class="hint" id="rebroadcast-state">—</span>
+        </div>
+      </div>
+      <div class="setting">
+        <label for="rebroadcast-interval">Rebroadcast every</label>
+        <input type="number" id="rebroadcast-interval" min="1" step="1" /> <span class="unit">s</span>
+      </div>
+      <div class="setting">
+        <label for="rediscovery-interval">Re-discover every</label>
+        <input type="number" id="rediscovery-interval" min="5" step="1" /> <span class="unit">s</span>
+      </div>
+      <div class="setting save">
+        <button id="save-settings" class="btn">Save settings</button>
+        <span id="settings-saved" class="saved" hidden>Saved</span>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="list-head">
+        <h2>Services <span id="count" class="count">0</span></h2>
+        <div class="legend">
+          <span class="dot on"></span> rebroadcasting
+          <span class="sep"></span>
+          Toggle a service to include it in the broadcast loop
+        </div>
+      </div>
+      <div id="status" class="status" hidden></div>
+      <table class="services">
+        <thead>
+          <tr>
+            <th class="col-rb">Rebroadcast</th>
+            <th>Service type</th>
+            <th>Instance</th>
+            <th>Host : Port</th>
+            <th>Addresses</th>
+            <th class="col-rec">Records</th>
+            <th>Last seen</th>
+            <th class="col-del"></th>
+          </tr>
+        </thead>
+        <tbody id="services-body">
+          <tr class="empty">
+            <td colspan="8">No services cached yet — hit <strong>Discover services</strong> to scan the network.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <script src="app.js"></script>
+  </body>
+</html>

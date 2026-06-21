@@ -1,0 +1,39 @@
+# Home Assistant add-on manifest.
+# This repo root doubles as a local HA add-on: copy the whole folder into the
+# Home Assistant `/addons/` share and it will appear under Settings → Add-ons.
+name: mDNS Rebroadcast
+version: "0.1.0"
+slug: mdns_rebroadcast
+description: >-
+  Discover, cache and selectively rebroadcast mDNS/DNS-SD services on your LAN —
+  a workaround for mesh routers (e.g. TP-Link Deco) whose IGMP snooping breaks
+  mDNS discovery.
+# Node official images are multi-arch, so the single Dockerfile builds for any
+# of these on the host's architecture.
+arch:
+  - aarch64
+  - amd64
+  - armv7
+# We use a plain node image (no s6-overlay), and handle SIGTERM ourselves.
+init: false
+# REQUIRED: mDNS is multicast and only works with the container directly on the
+# host's network. Without this the add-on cannot see or send mDNS traffic.
+host_network: true
+# Serve the web UI through Home Assistant's ingress (sidebar panel, no extra
+# port to expose). The app also remains reachable directly at host:3000 because
+# of host_network.
+ingress: true
+ingress_port: 3000
+panel_icon: mdi:access-point
+panel_title: mDNS Rebroadcast
+boot: auto
+startup: application
+# User-configurable options, surfaced in the add-on Configuration tab.
+options:
+  mdns_interface: ""
+  log_level: info
+schema:
+  # LAN interface to use for IPv6 multicast (e.g. eth0). Leave blank to
+  # auto-detect. IPv4 works regardless.
+  mdns_interface: "str?"
+  log_level: "list(info|debug)?"

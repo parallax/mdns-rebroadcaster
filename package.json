@@ -1,0 +1,17 @@
+{
+  "name": "mdns-rebroadcast",
+  "version": "0.1.0",
+  "description": "Discover, cache and selectively rebroadcast mDNS/DNS-SD services on a single L2 segment (workaround for IGMP-snooping mesh routers).",
+  "type": "module",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js"
+  },
+  "engines": {
+    "node": ">=22.5.0"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "multicast-dns": "^7.2.5"
+  }
+}

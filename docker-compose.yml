@@ -1,0 +1,17 @@
+services:
+  mdns-rebroadcast:
+    build: .
+    # REQUIRED: multicast (mDNS) does not traverse Docker's bridge network.
+    # Host networking puts the container directly on your LAN segment.
+    network_mode: host
+    restart: unless-stopped
+    volumes:
+      # Persist the SQLite cache across restarts.
+      - ./data:/app/data
+    environment:
+      - PORT=3000
+      # For IPv6 rebroadcast, set this to your LAN interface name (e.g. eth0).
+      # Without it the app auto-detects, but on multi-interface hosts being
+      # explicit avoids binding to the wrong one. IPv4 works regardless.
+      # - MDNS_IFACE=eth0
+      # - DEBUG=1
