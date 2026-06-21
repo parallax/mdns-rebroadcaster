@@ -182,6 +182,11 @@ export function deleteService(serviceId) {
   return db.prepare('DELETE FROM services WHERE id = ?').run(serviceId).changes > 0;
 }
 
+/** Remove every cached service (and its records, via cascade). Returns the count removed. */
+export function deleteAllServices() {
+  return db.prepare('DELETE FROM services').run().changes;
+}
+
 export function getDb() {
   return db;
 }

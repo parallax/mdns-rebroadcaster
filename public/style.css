@@ -179,12 +179,25 @@ input[type="number"]:focus {
   color: var(--muted);
   margin-left: 6px;
 }
+.list-head-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
 .legend {
   color: var(--muted);
   font-size: 12px;
   display: flex;
   align-items: center;
   gap: 8px;
+}
+.danger-btn {
+  padding: 6px 12px;
+  font-size: 13px;
+}
+.danger-btn:hover {
+  border-color: var(--danger);
+  color: var(--danger);
 }
 .legend .sep {
   width: 1px;

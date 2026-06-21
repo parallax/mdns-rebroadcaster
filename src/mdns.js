@@ -22,9 +22,11 @@ export class MdnsManager {
     this.sockets = []; // [{ family, mdns }]
     this.activeServices = []; // services currently being rebroadcast (indexed)
     this._collector = null; // non-null while a discovery browse is in progress
+    this.ownAddresses = new Set(); // our own IPs, to ignore self-originated traffic
   }
 
   start() {
+    this.ownAddresses = computeOwnAddresses();
     this._createSocket('IPv4', { type: 'udp4', ip: '224.0.0.251' });
     // IPv6 link-local multicast (ff02::fb) is link-scoped, so it needs an
     // explicit interface address-with-scope. Auto-detect the primary LAN
@@ -55,7 +57,7 @@ export class MdnsManager {
     });
     mdns.on('error', (err) => this.log.warn(`[mdns:${family}] socket error: ${err.message}`));
     mdns.on('warning', (err) => this.log.warn(`[mdns:${family}] ${err.message}`));
-    mdns.on('response', (response) => this._onResponse(response));
+    mdns.on('response', (response, rinfo) => this._onResponse(response, rinfo));
     mdns.on('query', (query) => this._onQuery(query));
     this.sockets.push({ family, mdns });
     this.log.info(`[mdns] ${family} socket listening on :5353`);
@@ -102,9 +104,24 @@ export class MdnsManager {
     this._eachSocket((mdns) => mdns.query({ questions }));
   }
 
-  _onResponse(response) {
+  /** True if `addr` is one of this host's own addresses (i.e. we sent it). */
+  _isOwnAddress(addr) {
+    if (!addr) return false;
+    // IPv6 link-local addresses can arrive with a %scope suffix — strip it.
+    return this.ownAddresses.has(addr.split('%')[0].toLowerCase());
+  }
+
+  _onResponse(response, rinfo) {
     const collector = this._collector;
     if (!collector) return; // only collect while a browse is active
+
+    // Ignore traffic we originated. Our own rebroadcasts loop back to this
+    // socket; counting them as "seen" would keep a rebroadcast service alive in
+    // the cache forever (a self-sustaining ghost), even after its real owner has
+    // gone away or renamed. Discovery should reflect what *other* hosts
+    // advertise, not our own output. (This also skips services hosted on this
+    // machine, which don't need rebroadcasting anyway.)
+    if (this._isOwnAddress(rinfo && rinfo.address)) return;
 
     const all = [...(response.answers || []), ...(response.additionals || [])];
     for (const rec of all) {
@@ -271,6 +288,18 @@ export class MdnsManager {
     this._eachSocket((mdns) => mdns.destroy());
     this.sockets = [];
   }
+}
+
+/** Collect every local address (IPv4 + IPv6, normalised lowercase) plus loopback. */
+function computeOwnAddresses() {
+  const set = new Set(['127.0.0.1', '::1']);
+  const nets = os.networkInterfaces();
+  for (const list of Object.values(nets)) {
+    for (const iface of list || []) {
+      if (iface.address) set.add(iface.address.split('%')[0].toLowerCase());
+    }
+  }
+  return set;
 }
 
 /**

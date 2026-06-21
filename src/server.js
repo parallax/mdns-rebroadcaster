@@ -7,6 +7,7 @@ import {
   listServices,
   setRebroadcast,
   deleteService,
+  deleteAllServices,
   getAllSettings,
   setSetting,
 } from './db.js';
@@ -52,6 +53,12 @@ export function createServer(worker, { logger = console } = {}) {
     }
     worker.refreshActiveServices();
     res.json({ ok: true });
+  });
+
+  app.delete('/api/services', (req, res) => {
+    const removed = deleteAllServices();
+    worker.refreshActiveServices();
+    res.json({ ok: true, removed });
   });
 
   app.delete('/api/services/:id', (req, res) => {

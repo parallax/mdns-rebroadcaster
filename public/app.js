@@ -16,6 +16,7 @@ const els = {
   rdInterval: $('#rediscovery-interval'),
   saveBtn: $('#save-settings'),
   savedMsg: $('#settings-saved'),
+  clearAllBtn: $('#clear-all-btn'),
 };
 
 async function api(path, opts) {
@@ -178,6 +179,19 @@ els.body.addEventListener('click', async (e) => {
     els.count.textContent = els.body.querySelectorAll('tr[data-id]').length;
   } catch (err) {
     showStatus(`Failed to delete: ${err.message}`, true);
+  }
+});
+
+els.clearAllBtn.addEventListener('click', async () => {
+  const count = els.body.querySelectorAll('tr[data-id]').length;
+  if (count === 0) return;
+  if (!confirm(`Remove all ${count} cached services? This also stops rebroadcasting them.`)) return;
+  try {
+    const { removed } = await api('api/services', { method: 'DELETE' });
+    await loadServices();
+    showStatus(`Cleared ${removed} cached service${removed === 1 ? '' : 's'}.`);
+  } catch (err) {
+    showStatus(`Failed to clear: ${err.message}`, true);
   }
 });
 
